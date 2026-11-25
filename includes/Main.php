@@ -106,6 +106,9 @@ final class Main {
 		// Add plugin action links to plugins screen.
 		add_filter( 'plugin_action_links_' . plugin_basename( WPAI_PLUGIN_FILE ), array( $this, 'plugin_action_links' ) );
 
+		// Flag the plugin's experimental status on the plugins screen.
+		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
+
 		// Defer feature initialization to the 'init' action.
 		add_action( 'init', array( $this, 'initialize_features' ), 15 );
 
@@ -211,6 +214,29 @@ final class Main {
 	 */
 	public function register_provider_data(): void {
 		Asset_Loader::add_global_data( 'ProviderData', get_provider_availability_data() );
+	}
+
+	/**
+	 * Adds a note about the plugin's experimental status to the plugin list table.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @param array<string> $links       Existing plugin row meta links.
+	 * @param string        $plugin_file Path to the plugin file, relative to the plugins directory.
+	 * @return array<string> Modified plugin row meta links.
+	 */
+	public function plugin_row_meta( array $links, string $plugin_file ): array {
+		if ( plugin_basename( WPAI_PLUGIN_FILE ) !== $plugin_file ) {
+			return $links;
+		}
+
+		$links[] = sprintf(
+			'<strong>%1$s</strong> %2$s',
+			esc_html__( 'Experimental:', 'ai' ),
+			esc_html__( 'Experiments may change or be removed in any release, and some run automatically once enabled. Try them on a staging site first.', 'ai' )
+		);
+
+		return $links;
 	}
 
 	/**

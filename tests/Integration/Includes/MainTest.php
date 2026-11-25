@@ -92,6 +92,21 @@ class MainTest extends WP_UnitTestCase {
 		$this->assertSame( 'existing-link', $links[2] );
 	}
 
+	 /**
+	 * @since 1.6.0
+	 */
+	public function test_plugin_row_meta_adds_experimental_note_for_this_plugin_only() {
+		$main = Main::get_instance();
+
+		$links = $main->plugin_row_meta( array( 'existing-link' ), plugin_basename( WPAI_PLUGIN_FILE ) );
+		$this->assertCount( 2, $links );
+		$this->assertSame( 'existing-link', $links[0] );
+		$this->assertStringContainsString( 'Experimental:', $links[1] );
+
+		$other = $main->plugin_row_meta( array( 'existing-link' ), 'other-plugin/other-plugin.php' );
+		$this->assertSame( array( 'existing-link' ), $other );
+	}
+
 	/**
 	 * @since 1.0.0
 	 */
